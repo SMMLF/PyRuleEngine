@@ -4,13 +4,13 @@ https://hashcat.net/wiki/doku.php?id=rule_based_attack """
 import unittest
 from PyRuleEngine import RuleEngine
 
-RULEENGINE = RuleEngine()
+rule_engine = RuleEngine()
 
 
 def apply(word, rule):
     """Apply the rule to the given word"""
-    RULEENGINE.change_rules([rule])
-    return list(RULEENGINE.apply(word))[0]
+    rule_engine.change_rules([rule])
+    return list(rule_engine.apply(word))[0][0]
 
 
 class RuleTest(unittest.TestCase):

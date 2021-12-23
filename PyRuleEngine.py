@@ -2,11 +2,10 @@
 Library to implement hashcat style rule engine.
 """
 import re
-import sys
 
 # based on hashcat rules from
 # https://hashcat.net/wiki/doku.php?id=rule_based_attack
-from typing import Tuple, Any, List
+from typing import Tuple, List
 
 
 def i36(string):
@@ -136,9 +135,12 @@ class RuleEngine(object):
             word = string
             for function in rule:
                 try:
-                    word = function_map[function[0]](word, function[1:])
-                except IndexError as e:
-                    print(f"Some errors occur but ignored: \n{e}", file=sys.stderr)
+                    key = function[0]
+                    func = function_map[key]
+                    remain = function[1:]
+                    word = func(word, remain)
+                except IndexError:
+                    """Some operation like T8 could raise IndexError because the password could be too short."""
             yield word, rule
 
     def change_rules(self, new_rules):

@@ -2,10 +2,11 @@
 Library to implement hashcat style rule engine.
 """
 import re
-
+import sys
 
 # based on hashcat rules from
 # https://hashcat.net/wiki/doku.php?id=rule_based_attack
+from typing import Tuple, Any, List
 
 
 def i36(string):
@@ -29,7 +30,7 @@ def rule_regex_gen():
 
 __rule_regex__ = rule_regex_gen()
 
-functions = {
+function_map = {
     ':': lambda x, i: x,
     'l': lambda x, i: x.lower(),
     'u': lambda x, i: x.upper(),
@@ -44,28 +45,28 @@ def T(x, i):
     return ''.join((x[:number], x[number].swapcase(), x[number + 1:]))
 
 
-functions['T'] = T
-functions['r'] = lambda x, i: x[::-1]
-functions['d'] = lambda x, i: x + x
-functions['p'] = lambda x, i: x * (i36(i) + 1)
-functions['f'] = lambda x, i: x + x[::-1]
-functions['{'] = lambda x, i: x[1:] + x[0]
-functions['}'] = lambda x, i: x[-1] + x[:-1]
-functions['$'] = lambda x, i: x + i
-functions['^'] = lambda x, i: i + x
-functions['['] = lambda x, i: x[1:]
-functions[']'] = lambda x, i: x[:-1]
-functions['D'] = lambda x, i: x[:i36(i) - 1] + x[i36(i):]
-functions['x'] = lambda x, i: x[i36(i[0]):i36(i[1])]
-functions['O'] = lambda x, i: x[:i36(i[0])] + x[i36(i[1]) + 1:]
-functions['i'] = lambda x, i: x[:i36(i[0])] + i[1] + x[i36(i[0]):]
-functions['o'] = lambda x, i: x[:i36(i[0])] + i[1] + x[i36(i[0]) + 1:]
-functions["'"] = lambda x, i: x[:i36(i)]
-functions['s'] = lambda x, i: x.replace(i[0], i[1])
-functions['@'] = lambda x, i: x.replace(i, '')
-functions['z'] = lambda x, i: x[0] * i36(i) + x
-functions['Z'] = lambda x, i: x + x[-1] * i36(i)
-functions['q'] = lambda x, i: ''.join([a * 2 for a in x])
+function_map['T'] = T
+function_map['r'] = lambda x, i: x[::-1]
+function_map['d'] = lambda x, i: x + x
+function_map['p'] = lambda x, i: x * (i36(i) + 1)
+function_map['f'] = lambda x, i: x + x[::-1]
+function_map['{'] = lambda x, i: x[1:] + x[0]
+function_map['}'] = lambda x, i: x[-1] + x[:-1]
+function_map['$'] = lambda x, i: x + i
+function_map['^'] = lambda x, i: i + x
+function_map['['] = lambda x, i: x[1:]
+function_map[']'] = lambda x, i: x[:-1]
+function_map['D'] = lambda x, i: x[:i36(i) - 1] + x[i36(i):]
+function_map['x'] = lambda x, i: x[i36(i[0]):i36(i[1])]
+function_map['O'] = lambda x, i: x[:i36(i[0])] + x[i36(i[1]) + 1:]
+function_map['i'] = lambda x, i: x[:i36(i[0])] + i[1] + x[i36(i[0]):]
+function_map['o'] = lambda x, i: x[:i36(i[0])] + i[1] + x[i36(i[0]) + 1:]
+function_map["'"] = lambda x, i: x[:i36(i)]
+function_map['s'] = lambda x, i: x.replace(i[0], i[1])
+function_map['@'] = lambda x, i: x.replace(i, '')
+function_map['z'] = lambda x, i: x[0] * i36(i) + x
+function_map['Z'] = lambda x, i: x + x[-1] * i36(i)
+function_map['q'] = lambda x, i: ''.join([a * 2 for a in x])
 
 __memorized__ = ['']
 
@@ -78,9 +79,9 @@ def extract_memory(string, args):
     return ''.join(string)
 
 
-functions['X'] = extract_memory
-functions['4'] = lambda x, i: x + __memorized__[0]
-functions['6'] = lambda x, i: __memorized__[0] + x
+function_map['X'] = extract_memory
+function_map['4'] = lambda x, i: x + __memorized__[0]
+function_map['6'] = lambda x, i: __memorized__[0] + x
 
 
 def memorize(string, _):
@@ -89,7 +90,7 @@ def memorize(string, _):
     return string
 
 
-functions['M'] = memorize
+function_map['M'] = memorize
 
 
 class RuleEngine(object):
@@ -127,7 +128,7 @@ class RuleEngine(object):
             rules = [':']
         self.rules = tuple(map(__rule_regex__.findall, rules))
 
-    def apply(self, string):
+    def apply(self, string: str) -> Tuple[str, List[str]]:
         """
         Apply saved rules to given string. It returns a generator object, so you
         can't use list indexes on it. """
@@ -135,10 +136,10 @@ class RuleEngine(object):
             word = string
             for function in rule:
                 try:
-                    word = functions[function[0]](word, function[1:])
-                except IndexError:
-                    pass
-            yield word
+                    word = function_map[function[0]](word, function[1:])
+                except IndexError as e:
+                    print(f"Some errors occur but ignored: \n{e}", file=sys.stderr)
+            yield word, rule
 
     def change_rules(self, new_rules):
         """Replace current rules with new_rules"""

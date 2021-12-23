@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Dict, List, Generator, Tuple
 
-import PyRuleEngine
+from . import PyRuleEngine
 
 
 def read_rules(rule_path) -> List[str]:
@@ -11,7 +11,7 @@ def read_rules(rule_path) -> List[str]:
     return rules
 
 
-def read_words(words_path) -> Generator[Tuple[int, str]]:
+def read_words(words_path) -> Generator[Tuple[int, str], None, None]:
     with open(words_path, 'r') as f_words:
         idx = 0
         for line in f_words:
@@ -30,7 +30,8 @@ def read_target(target_path) -> Dict[str, int]:
     return pwd_set
 
 
-def py_hashcat(words_path: str, rules_path: str, target_path: str):
+def py_hashcat(words_path: str, rules_path: str, target_path: str) \
+        -> Generator[Tuple[str, str, List[str], int], None, None]:
     word_list = read_words(words_path=words_path)
     rules = read_rules(rule_path=rules_path)
     targets = read_target(target_path=target_path)

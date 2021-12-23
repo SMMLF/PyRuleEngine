@@ -4,6 +4,7 @@ import time
 
 import PyRuleEngine
 
+
 def main():
     input_list = [''.join(random.choice(string.printable) for _ in range(10))
                   for i in range(1000000)]
@@ -18,7 +19,8 @@ def main():
         for base in input_list:
             list(engine.apply(base))
         print('%s%s%s' % (rule, ' ' * (10 - len(rule)),
-                          round(time.time() - start,4)))
+                          round(time.time() - start, 4)))
+
 
 if __name__ == '__main__':
     main()

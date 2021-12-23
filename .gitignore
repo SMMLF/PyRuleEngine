@@ -87,3 +87,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+.idea
+_trial_temp
+*.rule
+rules.txt
+target.txt
+words.txt

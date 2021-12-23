@@ -1,19 +1,21 @@
-'''
+"""
 Test whether rule engine has correct output for different rules as specified on
-https://hashcat.net/wiki/doku.php?id=rule_based_attack '''
+https://hashcat.net/wiki/doku.php?id=rule_based_attack """
 import unittest
 from PyRuleEngine import RuleEngine
+
 RULEENGINE = RuleEngine()
 
 
 def apply(word, rule):
-    '''Apply the rule to the given word'''
+    """Apply the rule to the given word"""
     RULEENGINE.change_rules([rule])
     return list(RULEENGINE.apply(word))[0]
 
 
 class RuleTest(unittest.TestCase):
-    '''Test whether the rule engine has the right output for different rules'''
+    """Test whether the rule engine has the right output for different rules"""
+
     def test_nothing(self):
         self.assertEqual(apply('p@ssW0rd', ':'), 'p@ssW0rd')
 
@@ -109,6 +111,7 @@ class RuleTest(unittest.TestCase):
 
     def test_memorize(self):
         self.assertEqual(apply('p@ssW0rd', 'lMuX084'), 'P@SSp@ssw0rdW0RD')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -31,17 +31,21 @@ def read_target(target_path) -> Dict[str, int]:
 
 
 def py_hashcat(words_path: str, rules_path: str, target_path: str) \
-        -> Generator[Tuple[str, str, List[str], int], None, None]:
+        -> Generator[Tuple[str, str, List[str], int, int, int], None, None]:
     word_list = read_words(words_path=words_path)
     rules = read_rules(rule_path=rules_path)
     targets = read_target(target_path=target_path)
     engine = PyRuleEngine.RuleEngine(rules=rules)
     guess_number = 0
+    acc_guessed = 0
     for i, word in word_list:
         n = 0
         for guess, rule in engine.apply(word):
             n += 1
             if guess in targets:
-                yield word, guess, rule, guess_number + n
+                duplicates = targets[guess]
+                acc_guessed += duplicates
+                yield word, guess, rule, guess_number + n, duplicates, acc_guessed
+                del targets[guess]
         guess_number += n
     pass

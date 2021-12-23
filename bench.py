@@ -7,7 +7,7 @@ import PyRuleEngine
 
 def main():
     input_list = [''.join(random.choice(string.printable) for _ in range(10))
-                  for i in range(1000000)]
+                  for _ in range(1000000)]
     engines = []
     for rule in [':', 'l', 'u', 'c', 'C', 't', 'T3', 'r', 'd', 'p2', 'f',
                  '{', '}', '$1', '^1', '[', ']', 'D3', 'x04', 'O12', 'i4!',

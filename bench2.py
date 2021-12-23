@@ -15,7 +15,7 @@ def read_rules(rule_path):
 
 def wrapper(rules_path, log_path):
     input_list = [''.join(random.choice(string.printable) for _ in range(10))
-                  for i in range(1000000)]
+                  for _ in range(1000000)]
     engines = []
     rules = read_rules(rules_path)
     for rule in rules:

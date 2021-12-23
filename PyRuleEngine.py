@@ -23,13 +23,13 @@ def rule_regex_gen():
     __rules__ += [r'X\w\w\w', '4', '6', 'M']
     for i, func in enumerate(__rules__):
         __rules__[i] = func[0] + func[1:].replace(r'\w', '[a-zA-Z0-9]')
-    ruleregex = '|'.join(['%s%s' % (re.escape(a[0]), a[1:]) for a in __rules__])
-    return re.compile(ruleregex)
+    rule_regex = '|'.join(['%s%s' % (re.escape(a[0]), a[1:]) for a in __rules__])
+    return re.compile(rule_regex)
 
 
-__ruleregex__ = rule_regex_gen()
+__rule_regex__ = rule_regex_gen()
 
-FUNCTS = {
+functions = {
     ':': lambda x, i: x,
     'l': lambda x, i: x.lower(),
     'u': lambda x, i: x.upper(),
@@ -44,28 +44,28 @@ def T(x, i):
     return ''.join((x[:number], x[number].swapcase(), x[number + 1:]))
 
 
-FUNCTS['T'] = T
-FUNCTS['r'] = lambda x, i: x[::-1]
-FUNCTS['d'] = lambda x, i: x + x
-FUNCTS['p'] = lambda x, i: x * (i36(i) + 1)
-FUNCTS['f'] = lambda x, i: x + x[::-1]
-FUNCTS['{'] = lambda x, i: x[1:] + x[0]
-FUNCTS['}'] = lambda x, i: x[-1] + x[:-1]
-FUNCTS['$'] = lambda x, i: x + i
-FUNCTS['^'] = lambda x, i: i + x
-FUNCTS['['] = lambda x, i: x[1:]
-FUNCTS[']'] = lambda x, i: x[:-1]
-FUNCTS['D'] = lambda x, i: x[:i36(i) - 1] + x[i36(i):]
-FUNCTS['x'] = lambda x, i: x[i36(i[0]):i36(i[1])]
-FUNCTS['O'] = lambda x, i: x[:i36(i[0])] + x[i36(i[1]) + 1:]
-FUNCTS['i'] = lambda x, i: x[:i36(i[0])] + i[1] + x[i36(i[0]):]
-FUNCTS['o'] = lambda x, i: x[:i36(i[0])] + i[1] + x[i36(i[0]) + 1:]
-FUNCTS["'"] = lambda x, i: x[:i36(i)]
-FUNCTS['s'] = lambda x, i: x.replace(i[0], i[1])
-FUNCTS['@'] = lambda x, i: x.replace(i, '')
-FUNCTS['z'] = lambda x, i: x[0] * i36(i) + x
-FUNCTS['Z'] = lambda x, i: x + x[-1] * i36(i)
-FUNCTS['q'] = lambda x, i: ''.join([a * 2 for a in x])
+functions['T'] = T
+functions['r'] = lambda x, i: x[::-1]
+functions['d'] = lambda x, i: x + x
+functions['p'] = lambda x, i: x * (i36(i) + 1)
+functions['f'] = lambda x, i: x + x[::-1]
+functions['{'] = lambda x, i: x[1:] + x[0]
+functions['}'] = lambda x, i: x[-1] + x[:-1]
+functions['$'] = lambda x, i: x + i
+functions['^'] = lambda x, i: i + x
+functions['['] = lambda x, i: x[1:]
+functions[']'] = lambda x, i: x[:-1]
+functions['D'] = lambda x, i: x[:i36(i) - 1] + x[i36(i):]
+functions['x'] = lambda x, i: x[i36(i[0]):i36(i[1])]
+functions['O'] = lambda x, i: x[:i36(i[0])] + x[i36(i[1]) + 1:]
+functions['i'] = lambda x, i: x[:i36(i[0])] + i[1] + x[i36(i[0]):]
+functions['o'] = lambda x, i: x[:i36(i[0])] + i[1] + x[i36(i[0]) + 1:]
+functions["'"] = lambda x, i: x[:i36(i)]
+functions['s'] = lambda x, i: x.replace(i[0], i[1])
+functions['@'] = lambda x, i: x.replace(i, '')
+functions['z'] = lambda x, i: x[0] * i36(i) + x
+functions['Z'] = lambda x, i: x + x[-1] * i36(i)
+functions['q'] = lambda x, i: ''.join([a * 2 for a in x])
 
 __memorized__ = ['']
 
@@ -78,9 +78,9 @@ def extract_memory(string, args):
     return ''.join(string)
 
 
-FUNCTS['X'] = extract_memory
-FUNCTS['4'] = lambda x, i: x + __memorized__[0]
-FUNCTS['6'] = lambda x, i: __memorized__[0] + x
+functions['X'] = extract_memory
+functions['4'] = lambda x, i: x + __memorized__[0]
+functions['6'] = lambda x, i: __memorized__[0] + x
 
 
 def memorize(string, _):
@@ -89,7 +89,7 @@ def memorize(string, _):
     return string
 
 
-FUNCTS['M'] = memorize
+functions['M'] = memorize
 
 
 class RuleEngine(object):
@@ -100,7 +100,7 @@ class RuleEngine(object):
     is put where the arguments would be then the whitespace will be tret as if
     it was the argument.
     e.g. '$l' will append letter 'l', but '$ l' will append ' ' and then
-    lowercase the whole string. (Below I added an append 'y' just to make it
+    lowercase the whole string. (Below I added an l append 'y' just to make it
     clear that a space was added)
     >>> for i in RuleEngine(['$l $y', '$ l$y']).apply('PASSWORD'):
     ...        print(i)
@@ -125,24 +125,24 @@ class RuleEngine(object):
     def __init__(self, rules=None):
         if rules is None:
             rules = [':']
-        self.rules = tuple(map(__ruleregex__.findall, rules))
+        self.rules = tuple(map(__rule_regex__.findall, rules))
 
     def apply(self, string):
         """
-        Apply saved rules to given string. It return a generator object so you
+        Apply saved rules to given string. It returns a generator object, so you
         can't use list indexes on it. """
         for rule in self.rules:
             word = string
             for function in rule:
                 try:
-                    word = FUNCTS[function[0]](word, function[1:])
+                    word = functions[function[0]](word, function[1:])
                 except IndexError:
                     pass
             yield word
 
     def change_rules(self, new_rules):
         """Replace current rules with new_rules"""
-        self.rules = tuple(map(__ruleregex__.findall, new_rules))
+        self.rules = tuple(map(__rule_regex__.findall, new_rules))
 
 
 if __name__ == "__main__":

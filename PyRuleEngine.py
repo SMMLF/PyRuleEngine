@@ -126,12 +126,14 @@ class RuleEngine(object):
         if rules is None:
             rules = [':']
         self.rules = tuple(map(__rule_regex__.findall, rules))
+        self.indices = range(0, len(self.rules))
 
     def apply(self, string: str) -> Tuple[str, List[str]]:
         """
         Apply saved rules to given string. It returns a generator object, so you
         can't use list indexes on it. """
-        for rule in self.rules:
+        for idx in self.indices:
+            rule = self.rules[idx]
             word = string
             for function in rule:
                 try:
@@ -146,7 +148,7 @@ class RuleEngine(object):
     def change_rules(self, new_rules):
         """Replace current rules with new_rules"""
         self.rules = tuple(map(__rule_regex__.findall, new_rules))
+        self.indices = range(0, len(self.rules))
 
-
-if __name__ == "__main__":
-    pass
+    def change_indices(self, new_indices):
+        self.indices = new_indices

@@ -1,8 +1,6 @@
 from collections import defaultdict
 from typing import Dict, List, Generator, Tuple
 
-from . import PyRuleEngine
-
 
 def read_rules(rule_path) -> List[str]:
     with open(rule_path, 'r') as f_rule:
@@ -11,9 +9,15 @@ def read_rules(rule_path) -> List[str]:
     return rules
 
 
-def read_words(words_path) -> Generator[Tuple[int, str], None, None]:
+def read_words(words_path: str, start_at: int = 1) -> Generator[Tuple[int, str], None, None]:
+    """
+    start_at specified line number.
+    """
     with open(words_path, 'r') as f_words:
-        idx = 0
+        start_at = max(1, start_at)
+        for _ in range(1, start_at):
+            f_words.readline()
+        idx = start_at - 1
         for line in f_words:
             line = line.strip('\r\n')
             yield idx, line
@@ -28,24 +32,3 @@ def read_target(target_path) -> Dict[str, int]:
             pwd_set[line] += 1
         pass
     return pwd_set
-
-
-def py_hashcat(words_path: str, rules_path: str, target_path: str) \
-        -> Generator[Tuple[str, str, List[str], int, int, int], None, None]:
-    word_list = read_words(words_path=words_path)
-    rules = read_rules(rule_path=rules_path)
-    targets = read_target(target_path=target_path)
-    engine = PyRuleEngine.RuleEngine(rules=rules)
-    guess_number = 0
-    acc_guessed = 0
-    for i, word in word_list:
-        n = 0
-        for guess, rule in engine.apply(word):
-            n += 1
-            if guess in targets:
-                duplicates = targets[guess]
-                acc_guessed += duplicates
-                yield word, guess, rule, guess_number + n, duplicates, acc_guessed
-                del targets[guess]
-        guess_number += n
-    pass

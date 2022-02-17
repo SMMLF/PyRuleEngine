@@ -46,6 +46,40 @@ def T(x, i):
     return ''.join((x[:number], x[number].swapcase(), x[number + 1:]))
 
 
+def delete_m_start_at_n(word, indices):
+    n, m = indices
+    n = i36(n)
+    m = i36(m)
+    if n + m <= len(word):
+        return word[:n] + word[n + m:]
+    else:
+        return word
+
+
+def overwrite_with_x_at_n(word, indices):
+    n, x = indices
+    n = i36(n)
+    if n >= len(word):
+        return word
+    return word[:n] + x + word[n + 1:]
+
+
+def insert_x_at_n(word, indices):
+    n, x = indices
+    n = i36(n)
+    if n > len(word):
+        return word
+    return word[:n] + x + word[n:]
+
+
+def delete_at_n(word, indices):
+    n, = indices
+    n = i36(n)
+    if n >= len(word):
+        return word
+    return word[:n] + word[n + 1:]
+
+
 function_map['T'] = T
 function_map['r'] = lambda x, i: x[::-1]
 function_map['d'] = lambda x, i: x + x
@@ -57,11 +91,11 @@ function_map['$'] = lambda x, i: x + i
 function_map['^'] = lambda x, i: i + x
 function_map['['] = lambda x, i: x[1:]
 function_map[']'] = lambda x, i: x[:-1]
-function_map['D'] = lambda x, i: x[:i36(i) - 1] + x[i36(i):]
+function_map['D'] = delete_at_n
 function_map['x'] = lambda x, i: x[i36(i[0]):i36(i[1])]
-function_map['O'] = lambda x, i: x[:i36(i[0])] + x[i36(i[1]) + 1:]
-function_map['i'] = lambda x, i: x[:i36(i[0])] + i[1] + x[i36(i[0]):]
-function_map['o'] = lambda x, i: x[:i36(i[0])] + i[1] + x[i36(i[0]) + 1:]
+function_map['O'] = delete_m_start_at_n
+function_map['i'] = insert_x_at_n
+function_map['o'] = overwrite_with_x_at_n
 function_map["'"] = lambda x, i: x[:i36(i)]
 function_map['s'] = lambda x, i: x.replace(i[0], i[1])
 function_map['@'] = lambda x, i: x.replace(i, '')

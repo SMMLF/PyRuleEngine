@@ -154,6 +154,16 @@ class RuleTest(unittest.TestCase):
     def test_title_nth(self):
         self.assertEqual(apply('pass-word', '30-'), 'pass-Word')
 
+    def test(self):
+        self.assertEqual(apply('mycomputer', 'O02'), 'computer')
+        self.assertEqual(apply('mycomputer', 'O02 $1'), 'computer1')
+        self.assertEqual(apply('Q12q34Q56', 'l D6'), 'q12q3456')
+        self.assertEqual(apply('789632145', 'D0 }'), '58963214')
+        self.assertEqual(apply('xiaoweiwei', 'swf O94'), 'xiaofeifei')
+        self.assertEqual(apply('434118', 'o33 o7@'), '434318')
+        self.assertEqual(apply('4210021837', 'O46 z2'), '444210')
+        self.assertEqual(apply('123123wo', 'i8i D6'), '123123oi')
+
 
 if __name__ == '__main__':
     unittest.main()

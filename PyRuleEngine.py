@@ -21,6 +21,8 @@ def rule_regex_gen():
         r'o\w.', r"'\w", 's..', '@.', r'z\w', r'Z\w', 'q',
     ]
     __rules__ += [r'X\w\w\w', '4', '6', 'M']
+    __rules__ += ['k', 'K', r'*\w\w', r'L\w', r'R\w', r'+\w', r'-\w',
+                  r'.\w', r',\w', r'y\w', r'Y\w', 'E', 'e.', r'3\w.']
     for i, func in enumerate(__rules__):
         __rules__[i] = func[0] + func[1:].replace(r'\w', '[a-zA-Z0-9]')
     rule_regex = '|'.join(['%s%s' % (re.escape(a[0]), a[1:]) for a in __rules__])
@@ -66,6 +68,130 @@ function_map['@'] = lambda x, i: x.replace(i, '')
 function_map['z'] = lambda x, i: x[0] * i36(i) + x
 function_map['Z'] = lambda x, i: x + x[-1] * i36(i)
 function_map['q'] = lambda x, i: ''.join([a * 2 for a in x])
+function_map['k'] = lambda x, i: x[1] + x[0] + x[2:]
+function_map['K'] = lambda x, i: x[:-2] + x[-1] + x[-2]
+
+
+def swap_nm(word, indices):
+    n, m = indices
+    n = i36(n)
+    m = i36(m)
+    if n > m:
+        bak = n
+        n = m
+        m = bak
+    return word[:n] + word[m] + word[n + 1:m] + word[n] + word[m + 1:]
+
+
+def bitwise_left(word, indices):
+    n, = indices
+    n = i36(n)
+    c = ord(word[n])
+    c <<= 1
+    return word[:n] + chr(c) + word[n + 1:]
+
+
+def bitwise_right(word, indices):
+    n, = indices
+    n = i36(n)
+    c = ord(word[n])
+    c >>= 1
+    return word[:n] + chr(c) + word[n + 1:]
+
+
+def ascii_incr(word, indices):
+    n, = indices
+    n = i36(n)
+    c = chr(ord(word[n]) + 1)
+    return word[:n] + c + word[n + 1:]
+
+
+def ascii_desc(word, indices):
+    n, = indices
+    n = i36(n)
+    c = chr(ord(word[n]) - 1)
+    return word[:n] + c + word[n + 1:]
+
+
+def replace_plus(word, indices):
+    n, = indices
+    n = i36(n)
+    c = word[n + 1]
+    return word[:n] + c + word[n + 1:]
+
+
+def replace_minus(word, indices):
+    n, = indices
+    n = i36(n)
+    c = word[n - 1]
+    return word[:n] + c + word[n + 1:]
+
+
+def duplicate_first(word, indices):
+    n, = indices
+    n = i36(n)
+    word = word[:n] + word
+    return word
+
+
+def duplicate_last(word, indices):
+    n, = indices
+    n = i36(n)
+    word = word + word[-n:]
+    return word
+
+
+def title(word, indices):
+    word = word.lower()
+    spaces = [-1]
+    for i, c in enumerate(word):
+        if c == ' ':
+            spaces.append(i)
+    chr_array = list(word)
+    for i in spaces:
+        chr_array[i + 1] = chr_array[i + 1].upper()
+    return "".join(chr_array)
+
+
+def title_x(word, indices):
+    word = word.lower()
+    x, = indices
+    xs = [-1]
+    for i, c in enumerate(word):
+        if c == x:
+            xs.append(i)
+    chr_array = list(word)
+    for i in xs:
+        chr_array[i + 1] = chr_array[i + 1].upper()
+    return "".join(chr_array)
+
+
+def title_n(word, indices):
+    n, x = indices
+    n = i36(n)
+    counter = 0
+    idx = len(word)
+    for i, c in enumerate(word):
+        if c == x:
+            if counter == n:
+                idx = i + 1
+                break
+            counter += 1
+    return word[:idx] + word[idx].upper() + word[idx + 1:]
+
+
+function_map['*'] = swap_nm
+function_map['L'] = bitwise_left
+function_map['R'] = bitwise_right
+function_map['+'] = ascii_incr
+function_map['-'] = ascii_desc
+function_map['.'] = replace_plus
+function_map[','] = replace_minus
+function_map['y'] = duplicate_first
+function_map['Y'] = duplicate_last
+function_map['E'] = title
+function_map['e'] = title_x
+function_map['3'] = title_n
 
 __memorized__ = ['']
 

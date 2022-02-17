@@ -112,6 +112,48 @@ class RuleTest(unittest.TestCase):
     def test_memorize(self):
         self.assertEqual(apply('p@ssW0rd', 'lMuX084'), 'P@SSp@ssw0rdW0RD')
 
+    def test_swap_front(self):
+        self.assertEqual(apply('p@ssW0rd', 'k'), '@pssW0rd')
+
+    def test_swap_back(self):
+        self.assertEqual(apply('p@ssW0rd', 'K'), 'p@ssW0dr')
+
+    def test_swap_n(self):
+        self.assertEqual(apply('p@ssW0rd', '*34'), 'p@sWs0rd')
+
+    def test_bitwise_left(self):
+        self.assertEqual(apply('p@ssW0rd', 'L2'), 'p@æsW0rd')
+
+    def test_bitwise_right(self):
+        self.assertEqual(apply('p@ssW0rd', 'R2'), 'p@9sW0rd')
+
+    def test_ascii_increment(self):
+        self.assertEqual(apply('p@ssW0rd', '+2'), 'p@tsW0rd')
+
+    def test_bitwise_decrement(self):
+        self.assertEqual(apply('p@ssW0rd', '-1'), 'p?ssW0rd')
+
+    def test_replace_n_plus(self):
+        self.assertEqual(apply('p@ssW0rd', '.1'), 'psssW0rd')
+
+    def test_replace_n_minus(self):
+        self.assertEqual(apply('p@ssW0rd', ',1'), 'ppssW0rd')
+
+    def test_duplicate_front(self):
+        self.assertEqual(apply('p@ssW0rd', 'y2'), 'p@p@ssW0rd')
+
+    def test_duplicate_back(self):
+        self.assertEqual(apply('p@ssW0rd', 'Y2'), 'p@ssW0rdrd')
+
+    def test_title(self):
+        self.assertEqual(apply('p@ssW0rd w0rld', 'E'), 'P@ssw0rd W0rld')
+
+    def test_title_space(self):
+        self.assertEqual(apply('p@ssW0rd-w0rld', 'e-'), 'P@ssw0rd-W0rld')
+
+    def test_title_nth(self):
+        self.assertEqual(apply('pass-word', '30-'), 'pass-Word')
+
 
 if __name__ == '__main__':
     unittest.main()

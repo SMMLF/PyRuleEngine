@@ -80,32 +80,6 @@ def delete_at_n(word, indices):
     return word[:n] + word[n + 1:]
 
 
-function_map['T'] = T
-function_map['r'] = lambda x, i: x[::-1]
-function_map['d'] = lambda x, i: x + x
-function_map['p'] = lambda x, i: x * (i36(i) + 1)
-function_map['f'] = lambda x, i: x + x[::-1]
-function_map['{'] = lambda x, i: x[1:] + x[0]
-function_map['}'] = lambda x, i: x[-1] + x[:-1]
-function_map['$'] = lambda x, i: x + i
-function_map['^'] = lambda x, i: i + x
-function_map['['] = lambda x, i: x[1:]
-function_map[']'] = lambda x, i: x[:-1]
-function_map['D'] = delete_at_n
-function_map['x'] = lambda x, i: x[i36(i[0]):i36(i[1])]
-function_map['O'] = delete_m_start_at_n
-function_map['i'] = insert_x_at_n
-function_map['o'] = overwrite_with_x_at_n
-function_map["'"] = lambda x, i: x[:i36(i)]
-function_map['s'] = lambda x, i: x.replace(i[0], i[1])
-function_map['@'] = lambda x, i: x.replace(i, '')
-function_map['z'] = lambda x, i: x[0] * i36(i) + x
-function_map['Z'] = lambda x, i: x + x[-1] * i36(i)
-function_map['q'] = lambda x, i: ''.join([a * 2 for a in x])
-function_map['k'] = lambda x, i: x[1] + x[0] + x[2:]
-function_map['K'] = lambda x, i: x[:-2] + x[-1] + x[-2]
-
-
 def swap_nm(word, indices):
     n, m = indices
     n = i36(n)
@@ -214,6 +188,30 @@ def title_n(word, indices):
     return word[:idx] + word[idx].upper() + word[idx + 1:]
 
 
+function_map['T'] = T
+function_map['r'] = lambda x, i: x[::-1]
+function_map['d'] = lambda x, i: x + x
+function_map['p'] = lambda x, i: x * (i36(i) + 1)
+function_map['f'] = lambda x, i: x + x[::-1]
+function_map['{'] = lambda x, i: x[1:] + x[0]
+function_map['}'] = lambda x, i: x[-1] + x[:-1]
+function_map['$'] = lambda x, i: x + i
+function_map['^'] = lambda x, i: i + x
+function_map['['] = lambda x, i: x[1:]
+function_map[']'] = lambda x, i: x[:-1]
+function_map['D'] = delete_at_n
+function_map['x'] = lambda x, i: x[i36(i[0]):i36(i[1])]
+function_map['O'] = delete_m_start_at_n
+function_map['i'] = insert_x_at_n
+function_map['o'] = overwrite_with_x_at_n
+function_map["'"] = lambda x, i: x[:i36(i)]
+function_map['s'] = lambda x, i: x.replace(i[0], i[1])
+function_map['@'] = lambda x, i: x.replace(i, '')
+function_map['z'] = lambda x, i: x[0] * i36(i) + x
+function_map['Z'] = lambda x, i: x + x[-1] * i36(i)
+function_map['q'] = lambda x, i: ''.join([a * 2 for a in x])
+function_map['k'] = lambda x, i: x[1] + x[0] + x[2:]
+function_map['K'] = lambda x, i: x[:-2] + x[-1] + x[-2]
 function_map['*'] = swap_nm
 function_map['L'] = bitwise_left
 function_map['R'] = bitwise_right
@@ -263,7 +261,8 @@ class RuleEngine(object):
     lowercase the whole string. (Below I added an l append 'y' just to make it
     clear that a space was added)
     >>> for i in RuleEngine(['$l $y', '$ l$y']).apply('PASSWORD'):
-    ...        print(i)
+    ...     print(i)
+    ...
     PASSWORDly
     password y
 
@@ -271,12 +270,14 @@ class RuleEngine(object):
     string you want to apply the rules to.
     >>> engine=RuleEngine([':', '$1', 'ss$'])
     >>> for i in engine.apply('password'):
-    ...        print(i)
+    ...     print(i)
+    ...
     password
     password1
     pa$$word
     >>> for i in engine.apply('princess'):
-    ...        print(i)
+    ...     print(i)
+    ...
     princess
     princess1
     prince$$

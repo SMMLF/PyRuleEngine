@@ -4,7 +4,7 @@ from typing import Dict, List, Generator, Tuple
 
 def read_rules(rule_path) -> List[str]:
     with open(rule_path, 'r') as f_rule:
-        raw_rules = [r.strip() for r in f_rule]
+        raw_rules = [r.strip('\r\n') for r in f_rule]
         rules = [r for r in raw_rules if r and r[0] != '#']
     return rules
 

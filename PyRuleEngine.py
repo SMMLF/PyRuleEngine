@@ -149,7 +149,7 @@ def duplicate_last(word, indices):
     return word
 
 
-def title(word, indices):
+def title(word, _):
     word = word.lower()
     spaces = [-1]
     for i, c in enumerate(word):

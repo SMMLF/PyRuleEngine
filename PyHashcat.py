@@ -1,3 +1,4 @@
+import collections
 from collections import defaultdict
 from typing import Dict, List, Generator, Tuple
 
@@ -22,6 +23,15 @@ def read_words(words_path: str, start_at: int = 1) -> Generator[Tuple[int, str],
             line = line.strip('\r\n')
             yield idx, line
             idx += 1
+
+
+def read_dict(words_path: str) -> Dict[str, int]:
+    d = collections.defaultdict(int)
+    with open(words_path, 'r') as f_words:
+        for line in f_words:
+            line = line.strip('\r\n')
+            d[line] += 1
+    return d
 
 
 def read_target(target_path) -> Dict[str, int]:

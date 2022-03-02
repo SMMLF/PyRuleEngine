@@ -7,29 +7,80 @@ import re
 # https://hashcat.net/wiki/doku.php?id=rule_based_attack
 from typing import Tuple, List
 
+__p__ = [0]
+
 
 def i36(string):
     """Shorter way of converting base 36 string to integer"""
+    if string == 'p':
+        return __p__[0]
     return int(string, 36)
 
 
-def rule_regex_gen():
-    """Generates regex to parse rules"""
-    __rules__ = [
-        ':', 'l', 'u', 'c', 'C', 't', r'T\w', 'r', 'd', r'p\w', 'f', '{',
-        '}', '$.', '^.', '[', ']', r'D\w', r'x\w\w', r'O\w\w', r'i\w.',
-        r'o\w.', r"'\w", 's..', '@.', r'z\w', r'Z\w', 'q',
-    ]
-    __rules__ += [r'X\w\w\w', '4', '6', 'M']
-    __rules__ += ['k', 'K', r'*\w\w', r'L\w', r'R\w', r'+\w', r'-\w',
-                  r'.\w', r',\w', r'y\w', r'Y\w', 'E', 'e.', r'3\w.']
+def reject_rules_gen():
+    __rules__ = [r'<\w', r'>\w', r'_\w', '!.', '/.', '(.', ').', r'=\w.', r'%\w.', 'Q']
     for i, func in enumerate(__rules__):
         __rules__[i] = func[0] + func[1:].replace(r'\w', '[a-zA-Z0-9]')
     rule_regex = '|'.join(['%s%s' % (re.escape(a[0]), a[1:]) for a in __rules__])
     return re.compile(rule_regex)
 
 
-__rule_regex__ = rule_regex_gen()
+__rejected_rules__ = reject_rules_gen()
+
+
+def at_least_n_x(word, indices):
+    n, x = indices
+    n = i36(n)
+    cnt = 0
+    for i, c in enumerate(word):
+        if c == x:
+            cnt += 1
+        if cnt == n:
+            __p__[0] = i
+            return True
+    return False
+
+
+def no_x(word, indices):
+    x, = indices
+    for i, c in enumerate(word):
+        if c == x:
+            __p__[0] = i
+            return False
+    return True
+
+
+rejected_map = {
+    '<': lambda x, i: len(x) > i36(i[0]),
+    '>': lambda x, i: len(x) < i36(i[0]),
+    '_': lambda x, i: len(x) != i36(i[0]),
+    '!': lambda x, i: any(c == i[0] for c in x),
+    '/': lambda x, i: no_x,
+    '(': lambda x, i: x[0] != i[0],
+    ')': lambda x, i: x[-1] != i[0],
+    '=': lambda x, i: len(x) <= i36(i[0]) or x[i36(i[0])] != i[1],
+    '%': lambda x, i: at_least_n_x,
+    'Q': lambda x, i: x == __memorized__[0]
+}
+
+
+def rule_regex_gen():
+    """Generates regex to parse rules"""
+    functions = [
+        ':', 'l', 'u', 'c', 'C', 't', r'T\w', 'r', 'd', r'p\w', 'f', '{',
+        '}', '$.', '^.', '[', ']', r'D\w', r'x\w\w', r'O\w\w', r'i\w.',
+        r'o\w.', r"'\w", 's..', '@.', r'z\w', r'Z\w', 'q',
+    ]
+    functions += [r'X\w\w\w', '4', '6', 'M']
+    functions += ['k', 'K', r'*\w\w', r'L\w', r'R\w', r'+\w', r'-\w',
+                  r'.\w', r',\w', r'y\w', r'Y\w', 'E', 'e.', r'3\w.']
+    for i, func in enumerate(functions):
+        functions[i] = re.escape(func[0]) + func[1:].replace(r'\w', '[a-zA-Z0-9]')
+    rule_regex = '|'.join(functions)
+    return re.compile(rule_regex)
+
+
+__functions_regex__ = rule_regex_gen()
 
 function_map = {
     ':': lambda x, i: x,
@@ -283,11 +334,19 @@ class RuleEngine(object):
     prince$$
     """
 
-    def __init__(self, rules=None):
+    def __init__(self, rules=None, rejected_rules=None):
         if rules is None:
             rules = [':']
-        self.rules = tuple(map(__rule_regex__.findall, rules))
+        self.rules = tuple(map(__functions_regex__.findall, rules))
         self.indices = range(0, len(self.rules))
+        if rejected_rules is None:
+            rejected_rules = []
+        self.rejected_rules = tuple(map(__rejected_rules__.findall, rejected_rules))
+
+    def reject(self, word: str):
+        for rejected_rule in self.rejected_rules:
+            pass
+        pass
 
     def apply(self, string: str) -> Tuple[str, List[str]]:
         """
@@ -308,7 +367,7 @@ class RuleEngine(object):
 
     def change_rules(self, new_rules):
         """Replace current rules with new_rules"""
-        self.rules = tuple(map(__rule_regex__.findall, new_rules))
+        self.rules = tuple(map(__functions_regex__.findall, new_rules))
         self.indices = range(0, len(self.rules))
 
     def change_indices(self, new_indices):

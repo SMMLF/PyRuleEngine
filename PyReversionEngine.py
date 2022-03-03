@@ -62,9 +62,9 @@ def T(x, i):
 
 
 def delete_at_n(word, indices):
-    n, = indices
+    n, x = indices
     n = i36(n)
-    if n >= len(word):
+    if n >= len(word) or word[n] != x:
         return word
     return word[:n] + word[n + 1:]
 
@@ -103,10 +103,10 @@ def delete_extracted_memory():
 
 function_map = {
     ':': lambda x, i: x,
-    'l': lambda x, i: not_implemented,
-    'u': lambda x, i: not_implemented,
-    'c': lambda x, i: not_implemented,  # x.capitalize(),
-    'C': lambda x, i: not_implemented,  # x.capitalize().swapcase(),
+    'l': not_implemented,
+    'u': not_implemented,
+    'c': not_implemented,  # x.capitalize(),
+    'C': not_implemented,  # x.capitalize().swapcase(),
     't': lambda x, i: x.swapcase(),
     'T': T,
     'r': lambda x, i: x[::-1],
@@ -115,18 +115,18 @@ function_map = {
     'f': lambda x, i: x[:len(x) // 2],
     '{': lambda x, i: x[-1] + x[:-1],
     '}': lambda x, i: x[1:] + x[0],
-    '$': lambda x, i: x[:-1],
-    '^': lambda x, i: x[1],
-    '[': lambda x, i: not_implemented,
-    ']': lambda x, i: not_implemented,
-    'D': lambda x, i: not_implemented,
-    'x': lambda x, i: not_implemented,
-    'O': lambda x, i: not_implemented,
-    'i': lambda x, i: delete_at_n,
-    'o': lambda x, i: not_implemented,
-    "'": lambda x, i: not_implemented,
+    '$': lambda x, i: x[:-1] if x[-1] == i[0] else x,
+    '^': lambda x, i: x[1:] if x[0] == i[0] else x,
+    '[': not_implemented,
+    ']': not_implemented,
+    'D': not_implemented,
+    'x': not_implemented,
+    'O': not_implemented,
+    'i': delete_at_n,
+    'o': not_implemented,
+    "'": not_implemented,
     's': lambda x, i: x.replace(i[1], i[0]),
-    '@': lambda x, i: not_implemented,
+    '@': not_implemented,
     'z': delete_first_same_n,
     'Z': delete_last_same_n,
     'q': delete_doubled,

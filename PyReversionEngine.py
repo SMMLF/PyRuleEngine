@@ -103,9 +103,18 @@ def delete_extracted_memory():
 
 function_map = {
     ':': lambda x, i: x,
+    # 'l' will lower all characters in the word. Therefore, could we
+    # generate a word list whose words are all lowered. Thus, we could
+    # know that some words are equal to the target word when they apply
+    # the function of 'l'.
+    # === For rules with a single function. ===
     'l': not_implemented,
+    # Similar to 'l', find lowered target word in the lowered word list
     'u': not_implemented,
+    # Similar to 'l', a lowered word list, and we find the lowered
+    # target word.
     'c': not_implemented,  # x.capitalize(),
+    # Same with 'c'
     'C': not_implemented,  # x.capitalize().swapcase(),
     't': lambda x, i: x.swapcase(),
     'T': T,

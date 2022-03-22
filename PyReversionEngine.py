@@ -1,6 +1,8 @@
 """
 Library to implement hashcat style ``reversed`` rule engine.
 """
+import json
+import os.path
 import re
 
 # based on hashcat rules from
@@ -8,6 +10,24 @@ import re
 from typing import Tuple, List
 
 __p__ = [0]
+
+
+def read_reversion_dist():
+    reversion_json = os.path.join(os.path.dirname(__file__), 'reversion.json')
+    with open(reversion_json) as fp:
+        dist = json.load(fp)
+    n_dist = {}
+    for key in dist:
+        n_dist[key] = {}
+        for pos in dist[key]:
+            chrs = dist[key][pos]
+            n_chrs = sorted(chrs.items(), key=lambda v: v[1], reverse=True)
+            n_dist[key][int(pos)] = n_chrs[0][0]
+    return n_dist
+
+
+reversion_dist = read_reversion_dist()
+print(reversion_dist)
 
 
 def i36(string):
@@ -100,6 +120,17 @@ def delete_extracted_memory():
     saved = __memorized__[0]
     return saved
 
+
+def delete_N(word, indices):
+    n, = indices
+    n = i36(n)
+    if n > len(word):
+        return word
+    c = reversion_dist['D'][n]
+    return word[:n] + c + word[n:]
+
+
+print(delete_N('pssword', ['1']))
 
 function_map = {
     ':': lambda x, i: x,

@@ -27,7 +27,6 @@ def read_reversion_dist():
 
 
 reversion_dist = read_reversion_dist()
-print(reversion_dist)
 
 
 def i36(string):
@@ -129,8 +128,6 @@ def delete_N(word, indices):
     c = reversion_dist['D'][n]
     return word[:n] + c + word[n:]
 
-
-print(delete_N('pssword', ['1']))
 
 function_map = {
     ':': lambda x, i: x,

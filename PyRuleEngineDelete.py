@@ -1,6 +1,7 @@
 import argparse
 import json
 import sys
+from json import JSONDecodeError 
 
 from PyRuleEngine import RuleEngine, function_map, i36
 
@@ -39,14 +40,19 @@ count_func_map = {
 class RuleEngineDelete(RuleEngine):
     def __init__(self, rules=None, rejected_rules=None):
         super().__init__(rules, rejected_rules)
+        self.not_ok = set()
+        for rule_id, rule in enumerate(self.rules):
+            has_D = any(function[0] in count_func_map for function in rule)
+            if not has_D:
+                self.not_ok.add(rule_id)
 
     def count_delete(self, string: str, indices, f_out):
         for idx in indices:
+            if idx in self.not_ok:
+                continue
             rule = self.rules[idx]
             word = string
-            has_D = any(function[0] in count_func_map for function in rule)
-            if not has_D:
-                continue
+            
             for function in rule:
                 try:
                     key = function[0]
@@ -80,15 +86,22 @@ def wrapper():
 
         rules = meta['rules']
         engine = RuleEngineDelete(rules=rules, rejected_rules=None)
+        line_cnt = 1
         for line in f_log:
             line = line.strip('\r\n')
+            line_cnt += 1
             word, rule_ids = json.loads(line)
             engine.count_delete(word, rule_ids, f_out)
+            if line_cnt % 10000 == 0:
+                print(f"{line_cnt}", end='\r', flush=True, file=sys.stderr)
             pass
         pass
     pass
 
 
 if __name__ == '__main__':
-    wrapper()
+    try:
+        wrapper()
+    except JSONDecodeError:
+        print('over')
     pass

@@ -2,7 +2,6 @@ import argparse
 import json
 import sys
 
-from PyHashcat import read_rules
 from PyRuleEngine import RuleEngine, function_map, i36
 
 del_keys = set("lucC[]DxOo'@MX46")
@@ -69,17 +68,18 @@ def wrapper():
     cli = argparse.ArgumentParser('Check delete')
     cli.add_argument('-l', '--log', dest='log', required=True, help='read log file')
     cli.add_argument('-s', '--save', dest='save', help='save result')
-    cli.add_argument('-r', '--rules', dest='rules', required=True, help='rules file')
     args = cli.parse_args()
-    rules_file = args.rules
     log_file, save_file = args.log, args.save
-    rules = read_rules(rules_file)
     if save_file is not None:
         f_out = open(save_file, 'w')
     else:
         f_out = sys.stdout
-    engine = RuleEngineDelete(rules=rules, rejected_rules=None)
     with open(log_file, 'r') as f_log:
+        meta_line = f_log.readline().strip('\r\n')
+        meta = json.loads(meta_line)
+
+        rules = meta['rules']
+        engine = RuleEngineDelete(rules=rules, rejected_rules=None)
         for line in f_log:
             line = line.strip('\r\n')
             word, rule_ids = json.loads(line)
@@ -92,5 +92,3 @@ def wrapper():
 if __name__ == '__main__':
     wrapper()
     pass
-
-# engine.apply()

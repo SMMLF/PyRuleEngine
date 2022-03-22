@@ -96,6 +96,8 @@ def wrapper():
                 print(f"{line_cnt}", end='\r', flush=True, file=sys.stderr)
             pass
         pass
+    f_out.flush()
+    f_out.close()
     pass
 
 
